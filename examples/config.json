@@ -1,0 +1,60 @@
+{
+  "newrelic_api_key": "",
+  "graphite_host": "localhost",
+  "base_directory": "/data/app/data",
+  "type_command": {
+    "command": "/usr/local/bin/<%= @application_service_name %>",
+    "arguments": ["-i", "TYPE"]
+  },
+  "types": {
+    "tomcat": {
+      "pattern": "p[0-9]{4}",
+      "plugins": {
+        "pre": [
+          "StopProcess",
+          "EmptyWorkingDirectory"
+        ],
+        "post": [
+          "UploadVersionInformation",
+          "StartProcess",
+          "EnableSystemdProcess",
+          "AutoCleanup",
+          "Cleanup"
+        ],
+        "notification": [
+          "Graphite"
+        ]
+      }
+    },
+    "service": {
+      "pattern": "service",
+      "plugins": {
+        "pre": [
+          "StopProcess"
+        ],
+        "post": [
+          "UploadVersionInformation",
+          "StartProcess",
+          "EnableApplicationProcess"
+        ],
+        "notification": [
+          "Graphite"
+        ]
+      }
+    },
+    "timer": {
+      "plugins": {
+        "notification": [
+          "Graphite"
+        ]
+      }
+    },
+    "batch": {
+      "plugins": {
+        "notification": [
+          "Graphite"
+        ]
+      }
+    }
+  }
+}
