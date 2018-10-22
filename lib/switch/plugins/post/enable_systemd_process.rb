@@ -24,11 +24,11 @@ module Switch
 
         plugin_argument :switch_only, optional: true
 
-        def self.description
+        def self.post_description
           'enable process for startup'
         end
 
-        def run
+        def post
           execute(['sudo', '-n', 'systemctl', 'enable', @application], print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
         end
 

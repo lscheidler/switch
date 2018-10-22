@@ -25,13 +25,6 @@ module Switch
       plugin_argument :dryrun, optional: true
       plugin_argument :output, optional: true
 
-      def self.description
-      end
-
-      def description
-        self.class.description
-      end
-
       def puts msg
         @output.yield msg if @output
       end
@@ -42,6 +35,14 @@ module Switch
 
       def self.show_always?
         false
+      end
+
+      def method_missing(m, *args, &block)
+        if m.to_s.end_with? '_description'
+          self.class.send(m, *args, &block)
+        else
+          raise NoMethodError.new "undefined method `#{m}' for " + self.to_s
+        end
       end
     end
   end

@@ -30,7 +30,7 @@ module Switch
         plugin_argument :extensions, optional: true, default: ['jar', 'war']
         plugin_argument :force, optional: true
 
-        def self.description
+        def self.version_description
           'get next version'
         end
 

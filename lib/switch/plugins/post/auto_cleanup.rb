@@ -28,17 +28,17 @@ module Switch
         plugin_argument :switch_only, optional: true
         plugin_argument :auto_cleanup, optional: true, default: true
 
-        def self.description
+        def self.post_description
           'Cleanup old releases'
         end
 
-        def description
+        def post_description
           result = self.class.description + ":\n"
-          result += get_auto_cleanup_candidates.map{|x| '  - ' + x}.join("\n")
+          result += get_auto_cleanup_candidates.map{|x| '      - ' + x}.join("\n")
           result
         end
 
-        def run
+        def post
           get_auto_cleanup_candidates.each do |version|
             self.puts "cleanup old release #{version}"
             execute(['sudo', '-n', '-u', 'app', 'switch-cleanup', "-a", @application, "-v", version], print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)

@@ -30,15 +30,15 @@ module Switch
 
       plugin_argument :current_version, optional: true
 
-      def self.description
+      def self.switch_description
         'switch application current link'
       end
 
-      def description
+      def switch_description
           "switching #{@destination_directory}/#{@application}/current to new version"
       end
 
-      def run
+      def switch
         self.puts 'remove current link'
         if File.exist? "#{ @destination_directory }/#{ @application }/current" or File.symlink? "#{ @destination_directory }/#{ @application }/current"
           FileUtils.rm("#{ @destination_directory }/#{ @application }/current") unless @dryrun

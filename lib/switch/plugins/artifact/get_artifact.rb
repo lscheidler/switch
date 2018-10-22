@@ -28,7 +28,7 @@ module Switch
 
         plugin_argument :force, optional: true
 
-        def self.description
+        def self.artifact_description
           'get artifact'
         end
 

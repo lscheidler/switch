@@ -27,11 +27,11 @@ module Switch
 
         plugin_argument :switch_only, optional: true
 
-        def self.description
+        def self.pre_description
           'empty working directory'
         end
 
-        def run
+        def pre
           self.puts "remove all files in #{ @destination_directory }/wrapper/#{@application}/work/*"
           FileUtils.rm_r(Dir.glob("#{ @destination_directory }/wrapper/#{@application}/work/*")) unless @dryrun
         end

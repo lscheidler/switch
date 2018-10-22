@@ -27,11 +27,11 @@ module Switch
         plugin_argument :switch_only, optional: true
         plugin_argument :cleanup, optional: true, default: false
 
-        def self.description
+        def self.post_description
           'remove old release'
         end
 
-        def run
+        def post
           if @current_version and File.directory? "#{ @destination_directory }/#{ @application }/releases/#{ @current_version }"
             self.puts 'cleanup old release'
             execute(['sudo', '-n', '-u', 'app', 'switch-cleanup', "-a", @application, "-v", @current_version], print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)

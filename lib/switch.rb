@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require "bundler/setup"
+
+require 'highline/import'
+
 require "switch/version"
 
 require 'execute'
@@ -39,6 +43,7 @@ module Switch
 
     # set defaults
     def set_defaults
+      @script_name = File.basename($0)
       @config = OverlayConfig::Config.new(
         config_scope: 'switch',
         defaults: {
@@ -52,7 +57,7 @@ module Switch
           auto_cleanup: true,
           debug: false,
           keep_releases: 5,
-          output: Proc.new {|msg| Kernel.subsection sg, color: :yellow}
+          output: Proc.new {|msg| Kernel.subsection msg, color: :yellow}
         }
       )
       @config[:destination_directory] = @config.get(:base_directory) + '/data'
@@ -121,6 +126,14 @@ module Switch
         opts.on('-y', '--assume-yes', 'switch automaticly without interaction') do
           @assume_yes = true
         end
+
+        ## EXAMPLES
+        opts.separator "
+EXAMPLES:
+
+    # switching application staging/tools/mailconsumer to 1.0.1
+    #{@script_name} --application tools/mailconsumer --version 1.0.1
+"
       end
       @options.parse!
     end
@@ -154,9 +167,9 @@ module Switch
       @pm.initialize_plugins(defaults: @config)
 
       if switch?
-        each_plugin([:pre, :switch, :post, :notification]) do |plugin_class, plugin|
+        each_plugin([:pre, :switch, :post, :notification]) do |plugin_group, plugin_class, plugin|
           if not plugin.nil? and not plugin.skip?
-            plugin.run
+            plugin.send(plugin_group)
           end
         end
       end
@@ -220,22 +233,28 @@ module Switch
       types = @config.get(:types)
       types ||= {} # if types is not set
 
-      plugins = {
+      @plugins = {
         pre:    types.get([@config[:type].to_s, 'plugins', 'pre'], default: []),
         switch: types.get([@config[:type].to_s, 'plugins', 'switch'], default: ['SwitchPreviousLink', 'SwitchCurrentLink']),
         post:   types.get([@config[:type].to_s, 'plugins', 'post'], default: []),
         notification: types.get([@config[:type].to_s, 'plugins', 'notification'], default: [])
       }
 
-      plugins.each do |key, list_of_plugins|
+      @plugins.each do |key, list_of_plugins|
         prefix = 'Switch::Plugins::'
         if key != :switch
           prefix += key.to_s.capitalize + '::'
         end
 
-        list_of_plugins.each do |plugin|
-          @pm[prefix + plugin] and @pm[prefix + plugin].plugin_setting :disabled, false
-          puts colorize('| cannot find plugin ' + prefix + plugin, color: :yellow) if @pm[prefix + plugin].nil?
+        list_of_plugins.map! do |plugin|
+          plugin_name = if plugin.start_with? '::'
+                          'Switch::Plugins' + plugin
+                        else
+                          prefix + plugin
+                        end
+          @pm[plugin_name] and @pm[plugin_name].plugin_setting :disabled, false
+          puts colorize('| cannot find plugin ' + plugin_name, color: :yellow) if @pm[plugin_name].nil?
+          @pm[plugin_name]
         end
       end
     end
@@ -247,11 +266,11 @@ module Switch
       puts
       puts colorize('  Following commands are going to be executed:')
 
-      each_plugin([:pre, :switch, :post, :notification]) do |plugin_class, plugin|
-        if plugin.nil? and plugin_class.show_always?
-          puts colorize('    - skipping: ' + plugin_class.description, color: :yellow)
+      each_plugin([:pre, :switch, :post, :notification]) do |plugin_group, plugin_class, plugin|
+        if (plugin.nil? and plugin_class.show_always?) or (plugin and plugin_class.show_always? and plugin.skip?)
+          puts colorize('    - skipping: ' + plugin_class.send((plugin_group.to_s + '_description').to_sym), color: :yellow)
         elsif not plugin.nil? and not plugin.skip?
-          puts '    - ' + plugin.description
+          puts '    - ' + plugin.send((plugin_group.to_s + '_description').to_sym)
         end
       end
       puts
@@ -265,8 +284,11 @@ module Switch
 
     def each_plugin groups
       groups.each do |plugin_group|
-        @pm.each(group: plugin_group) do |plugin_class, plugin|
-          yield plugin_class, plugin
+        #@pm.each(group: plugin_group) do |plugin_class, plugin|
+        #  yield plugin_group, plugin_class, plugin
+        #end
+        @plugins[plugin_group].each do |plugin_class|
+          yield plugin_group, plugin_class, @pm.instance(plugin_class.name)
         end
       end
     end

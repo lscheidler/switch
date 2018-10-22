@@ -24,11 +24,11 @@ module Switch
 
         plugin_argument :switch_only, optional: true
 
-        def self.description
+        def self.post_description
           'starting process'
         end
 
-        def run
+        def post
           execute(['sudo', '-n', 'systemctl', 'start', @application.gsub('/', '-')], print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
         end
 

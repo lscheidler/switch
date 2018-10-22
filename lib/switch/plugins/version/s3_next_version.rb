@@ -34,7 +34,7 @@ module Switch
         plugin_argument :bucket_name, optional: true
         plugin_argument :object_prefix, optional: true, default: 'versions/'
 
-        def self.description
+        def self.version_description
           'get next version from s3'
         end
 

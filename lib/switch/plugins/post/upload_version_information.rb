@@ -20,11 +20,11 @@ module Switch
       class UploadVersionInformation < Switch::Plugins::Common
         plugin_group :post
 
-        def self.description
+        def self.post_description
           'upload versions file to s3'
         end
 
-        def run
+        def post
           execute(['versions', '-u'], print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
         end
       end

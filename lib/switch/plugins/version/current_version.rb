@@ -28,7 +28,7 @@ module Switch
 
         plugin_argument :extensions, optional: true, default: ['jar', 'war']
 
-        def self.description
+        def self.version_description
           'get current version'
         end
 

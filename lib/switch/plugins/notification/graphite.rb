@@ -28,12 +28,12 @@ module Switch
         plugin_argument :environment_name
         plugin_argument :version
 
-        def self.description
+        def self.notification_description
           'notify graphite about deployment'
         end
 
-        def run
-          self.puts description
+        def notification
+          self.puts notification_description
 
           unless @dryrun
             begin

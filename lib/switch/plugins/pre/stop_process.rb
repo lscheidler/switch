@@ -24,11 +24,11 @@ module Switch
 
         plugin_argument :switch_only, optional: true
 
-        def self.description
+        def self.pre_description
           'stopping process'
         end
 
-        def run
+        def pre
           execute(['sudo', '-n', 'systemctl', 'stop', @application.gsub('/', '-')], print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
         end
 
