@@ -14,7 +14,7 @@
 
 require_relative 'plugins/common'
 
-require_relative 'plugins/artifact/get_artifact'
+require_relative 'plugins/artifact/artifact'
 
 require_relative 'plugins/pre/stop_process'
 require_relative 'plugins/pre/empty_working_directory'
