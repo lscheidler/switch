@@ -47,7 +47,7 @@ module Switch
       @config = OverlayConfig::Config.new(
         config_scope: 'switch',
         defaults: {
-          artifact_plugin: 'Switch::Plugins::Artifact::GetArtifact',
+          artifact_plugin: 'Switch::Plugins::Artifact::Artifact',
           base_directory: '/data/app',
           bucket_name: 'my-application-artifacts',
           current_version_plugin: 'Switch::Plugins::Version::CurrentVersion',

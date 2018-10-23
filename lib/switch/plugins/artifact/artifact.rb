@@ -17,7 +17,7 @@ require_relative "../common"
 module Switch
   module Plugins
     module Artifact
-      class GetArtifact < Switch::Plugins::Common
+      class Artifact < Switch::Plugins::Common
         plugin_group :artifact
         plugin_setting :skip_auto_initialization, true
 
