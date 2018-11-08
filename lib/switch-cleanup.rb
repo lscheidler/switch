@@ -91,7 +91,7 @@ module Switch
       end
 
       # check, if version is linked as current
-      if File.exist? application_directory + '/current' and File.readlink application_directory + '/current'
+      if File.exist? application_directory + '/current' and File.readlink(application_directory + '/current') == version_directory
         subsection 'Version is currently active, abort. (' + version_directory + ')'
         exit 1
       end
