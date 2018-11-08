@@ -27,7 +27,7 @@ describe Switch::Plugins::SwitchCurrentLink do
   end
 
   it 'should switch current link' do
-    expect{@plugin.switch}.to output("""remove current link\ncurrent link doesn't exist.\ncreate current link with 0\.1\.0\nlog: user=lscheidler environment=staging application=test-app from=0.0.1 to=0.1.0\n""").to_stdout
+    expect{@plugin.switch}.to output(/remove current link\ncurrent link doesn't exist.\ncreate current link with 0\.1\.0\nlog: user=[^ ]* environment=staging application=test-app from=0.0.1 to=0.1.0\n/m).to_stdout
     expect(File.symlink? File.join(@config.destination_directory, @config.application, 'current')).to be(true)
     expect(File.readlink File.join(@config.destination_directory, @config.application, 'current')).to eq(File.join(@config.destination_directory, @config.application, 'releases', @config.version))
   end
