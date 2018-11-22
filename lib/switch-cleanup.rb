@@ -82,7 +82,8 @@ module Switch
 
     def run
       application_directory = @config[:destination_directory] + '/' + @config[:application]
-      version_directory =  application_directory + '/releases/' + @config[:version]
+      relative_version_directory = 'releases/' + @config[:version]
+      version_directory = application_directory + '/releases/' + @config[:version]
 
       # check, if destination is directory
       if not File.directory? version_directory
@@ -91,7 +92,9 @@ module Switch
       end
 
       # check, if version is linked as current
-      if File.exist? application_directory + '/current' and File.readlink(application_directory + '/current') == version_directory
+      if File.exist? application_directory + '/current' and 
+          (File.readlink(application_directory + '/current') == version_directory or
+           File.readlink(application_directory + '/current') == relative_version_directory)
         subsection 'Version is currently active, abort. (' + version_directory + ')'
         exit 1
       end
