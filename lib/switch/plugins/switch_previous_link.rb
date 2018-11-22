@@ -21,12 +21,13 @@ module Switch
     class SwitchPreviousLink < Switch::Plugins::Common
       plugin_group :switch
 
-      plugin_argument :destination_directory
       plugin_argument :application
-      plugin_argument :version
+      plugin_argument :destination_directory
       plugin_argument :switch_log
+      plugin_argument :version
 
       plugin_argument :current_version, optional: true
+      plugin_argument :relative_link, optional: true
 
       def self.switch_description
         'switch application previous link'
@@ -44,7 +45,11 @@ module Switch
           puts 'previous link doesn\'t exist.'
         end
         self.puts "create previous link with #{@current_version}"
-        FileUtils.ln_s "#{ @destination_directory }/#{ @application }/releases/#{ @current_version }", "#{ @destination_directory }/#{ @application }/previous" unless @dryrun
+        if @relative_link
+          FileUtils.ln_s "releases/#{ @current_version }", "#{ @destination_directory }/#{ @application }/previous" unless @dryrun
+        else
+          FileUtils.ln_s "#{ @destination_directory }/#{ @application }/releases/#{ @current_version }", "#{ @destination_directory }/#{ @application }/previous" unless @dryrun
+        end
       end
 
       def skip?

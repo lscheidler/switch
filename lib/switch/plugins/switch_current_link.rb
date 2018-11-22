@@ -22,13 +22,14 @@ module Switch
     class SwitchCurrentLink < Switch::Plugins::Common
       plugin_group :switch
 
-      plugin_argument :environment_name
-      plugin_argument :destination_directory
       plugin_argument :application
-      plugin_argument :version
+      plugin_argument :destination_directory
+      plugin_argument :environment_name
       plugin_argument :switch_log
+      plugin_argument :version
 
       plugin_argument :current_version, optional: true
+      plugin_argument :relative_link, optional: true
 
       def self.switch_description
         'switch application current link'
@@ -46,7 +47,11 @@ module Switch
           puts 'current link doesn\'t exist.'
         end
         self.puts "create current link with #{@version}"
-        FileUtils.ln_s "#{ @destination_directory }/#{ @application }/releases/#{ @version }", "#{ @destination_directory }/#{ @application }/current" unless @dryrun
+        if @relative_link
+          FileUtils.ln_s "releases/#{ @version }", "#{ @destination_directory }/#{ @application }/current" unless @dryrun
+        else
+          FileUtils.ln_s "#{ @destination_directory }/#{ @application }/releases/#{ @version }", "#{ @destination_directory }/#{ @application }/current" unless @dryrun
+        end
 
         @switch_log.info "user=#{get_user} environment=#{@environment_name} application=#{@application} from=#{@current_version} to=#{@version}"
       end

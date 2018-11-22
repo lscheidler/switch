@@ -48,15 +48,16 @@ module Switch
         config_scope: 'switch',
         defaults: {
           artifact_plugin: 'Switch::Plugins::Artifact::Artifact',
+          auto_cleanup: true,
           base_directory: '/data/app',
           bucket_name: 'my-application-artifacts',
           current_version_plugin: 'Switch::Plugins::Version::CurrentVersion',
+          debug: false,
+          environment_name: '',
+          keep_releases: 5,
           next_version_plugin: 'Switch::Plugins::Version::NextVersion',
           next_version_remote_plugin: 'Switch::Plugins::Version::S3NextVersion',
-          environment_name: '',
-          auto_cleanup: true,
-          debug: false,
-          keep_releases: 5,
+          relative_link: true,
           output: Proc.new {|msg| Kernel.subsection msg, color: :yellow}
         }
       )
