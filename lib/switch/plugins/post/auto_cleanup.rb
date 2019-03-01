@@ -33,7 +33,7 @@ module Switch
         end
 
         def post_description
-          result = self.class.description + ":\n"
+          result = self.class.post_description + ":\n"
           result += get_auto_cleanup_candidates.map{|x| '      - ' + x}.join("\n")
           result
         end
