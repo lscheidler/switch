@@ -98,11 +98,14 @@ def create_release_data
   Dir.mkdir dir
 
   1.upto(8) do |x|
-    Dir.mkdir File.join(dir, '0.0.' + x.to_s)
+    release_dir = File.join(dir, '0.0.' + x.to_s)
+    Dir.mkdir release_dir
 
-    File.open(File.join(dir, '0.0.' + x.to_s, 'test.txt'), 'w') do |io|
+    File.open(File.join(release_dir, 'test.txt'), 'w') do |io|
       io.puts 'Hello World'
     end
+
+    FileUtils.touch release_dir, :mtime => Time.now - (10-x)
   end
 end
 
