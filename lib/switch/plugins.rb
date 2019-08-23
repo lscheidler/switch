@@ -15,6 +15,7 @@
 require_relative 'plugins/common'
 
 require_relative 'plugins/artifact/artifact'
+require_relative 'plugins/artifact/ecr'
 
 require_relative 'plugins/pre/stop_process'
 require_relative 'plugins/pre/empty_working_directory'
@@ -22,6 +23,7 @@ require_relative 'plugins/pre/empty_working_directory'
 require_relative 'plugins/start_stop_process'
 require_relative 'plugins/switch_previous_link'
 require_relative 'plugins/switch_current_link'
+require_relative 'plugins/docker_tag_and_push'
 
 require_relative 'plugins/post/upload_version_information'
 require_relative 'plugins/post/start_process'
@@ -30,9 +32,12 @@ require_relative 'plugins/post/enable_systemd_process'
 
 require_relative 'plugins/post/cleanup'
 require_relative 'plugins/post/auto_cleanup'
+require_relative 'plugins/post/docker_cleanup'
+require_relative 'plugins/post/docker_auto_cleanup'
 
 require_relative 'plugins/notification/graphite'
 
 require_relative 'plugins/version/current_version'
-require_relative 'plugins/version/next_version'
+require_relative 'plugins/version/current_docker_image_version'
+#require_relative 'plugins/version/next_version'
 require_relative 'plugins/version/s3_next_version'

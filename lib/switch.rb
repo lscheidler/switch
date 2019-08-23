@@ -47,7 +47,6 @@ module Switch
       @config = OverlayConfig::Config.new(
         config_scope: 'switch',
         defaults: {
-          artifact_plugin: 'Switch::Plugins::Artifact::Artifact',
           auto_cleanup: true,
           base_directory: '/data/app',
           bucket_name: 'my-application-artifacts',
@@ -55,7 +54,7 @@ module Switch
           debug: false,
           environment_name: '',
           keep_releases: 5,
-          next_version_plugin: 'Switch::Plugins::Version::NextVersion',
+          next_version_plugin: 'Switch::Plugins::Artifact::Artifact',
           next_version_remote_plugin: 'Switch::Plugins::Version::S3NextVersion',
           relative_link: true,
           output: Proc.new {|msg| Kernel.subsection msg, color: :yellow}
@@ -159,9 +158,11 @@ EXAMPLES:
 
       @pm.log = @log
 
+      get_application_type unless @config[:type]
+      @config.insert 0, "<#{@config.type.to_s}>", @config.types.get(@config.type.to_s, default: {})
+
       get_current_version
       get_next_version
-      get_application_type unless @config[:type]
 
       activate_plugins
 
@@ -241,6 +242,7 @@ EXAMPLES:
         notification: types.get([@config[:type].to_s, 'plugins', 'notification'], default: [])
       }
 
+      plugin_not_found = false
       @plugins.each do |key, list_of_plugins|
         prefix = 'Switch::Plugins::'
         if key != :switch
@@ -254,14 +256,18 @@ EXAMPLES:
                           prefix + plugin
                         end
           @pm[plugin_name] and @pm[plugin_name].plugin_setting :disabled, false
-          puts colorize('| cannot find plugin ' + plugin_name, color: :yellow) if @pm[plugin_name].nil?
+          if @pm[plugin_name].nil?
+            puts colorize('| cannot find plugin ' + plugin_name, color: :yellow)
+            plugin_not_found = true
+          end
           @pm[plugin_name]
         end
+        exit 1 if plugin_not_found
       end
     end
 
     def switch?
-      puts "  switching #{colorize(@config[:application], color: :yellow)}"
+      section "  switching #{colorize(@config[:application], color: :yellow)}", color: :yellow
       puts "    from:   #{colorize(@config[:current_version], color: :yellow)}#{( @config[:current_version_mtime].nil? ) ? "" : " 	(#{@config[:current_version_mtime]})"}"
       puts "    to:     #{colorize(@config[:version], color: :yellow)}#{( @config[:version_mtime].nil? ) ? "" : " 	(#{@config[:version_mtime]})"}"
       puts
@@ -271,7 +277,12 @@ EXAMPLES:
         if (plugin.nil? and plugin_class.show_always?) or (plugin and plugin_class.show_always? and plugin.skip?)
           puts colorize('    - skipping: ' + plugin_class.send((plugin_group.to_s + '_description').to_sym), color: :yellow)
         elsif not plugin.nil? and not plugin.skip?
-          puts '    - ' + plugin.send((plugin_group.to_s + '_description').to_sym)
+          description = plugin.send((plugin_group.to_s + '_description').to_sym)
+          if description.is_a? Array
+            puts '    - ' + description.join("\n    - ")
+          else
+            puts '    - ' + description
+          end
         end
       end
       puts

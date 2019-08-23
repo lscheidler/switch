@@ -7,6 +7,30 @@
     "arguments": ["-i", "TYPE"]
   },
   "types": {
+    "docker": {
+      "artifact_plugin": "Switch::Plugins::Artifact::ECR",
+      "ecr_repository": "<account-id>.dkr.ecr.<region>.amazonaws.com/<registry-name>",
+      "current_version_plugin": "Switch::Plugins::Version::CurrentDockerImageVersion",
+      "next_version_plugin": "Switch::Plugins::Artifact::ECR",
+      "plugins": {
+        "pre": [
+          "::StartStopProcess"
+        ],
+        "switch": [
+          "DockerTagAndPush"
+        ],
+        "post": [
+          "UploadVersionInformation",
+          "::StartStopProcess",
+          "EnableSystemdProcess",
+          "DockerAutoCleanup",
+          "DockerCleanup"
+        ],
+        "notification": [
+          "Graphite"
+        ]
+      }
+    },
     "tomcat": {
       "pattern": "p[0-9]{4}",
       "plugins": {

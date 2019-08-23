@@ -26,6 +26,7 @@ module Switch
         plugin_argument :application
         plugin_argument :version
 
+        plugin_argument :extensions, optional: true, default: ['jar', 'war']
         plugin_argument :force, optional: true
 
         def self.artifact_description
@@ -33,11 +34,20 @@ module Switch
         end
 
         def after_initialize
-          cmd = ['sudo', '-n', 'artifact', '--get', '-a', @application, '-e', @environment_name, '-v', @version, '-d', @destination_directory]
-          cmd << '-f' if @force
+          destination_directory = "#{ @destination_directory }/#{ @application }/releases/#{ @version }"
 
-          @status = execute(cmd, io_options: {:err=>[:child, :out]}, print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
-          fail "retrieval of #{@environment_name}/#{@application}/#{@version} failed." if not @status.success?
+          if not File.exist? destination_directory or Dir.glob("#{destination_directory}/*").empty? or @force
+            cmd = ['sudo', '-n', 'artifact', '--get', '-a', @application, '-e', @environment_name, '-v', @version, '-d', @destination_directory]
+            cmd << '-f' if @force
+
+            @status = execute(cmd, io_options: {:err=>[:child, :out]}, print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
+            fail "retrieval of #{@environment_name}/#{@application}/#{@version} failed." if not @status.success?
+          end
+        end
+
+        def mtime
+          @mtime = File.stat(Dir.glob("#{ @destination_directory }/#{ @application }/releases/#{@version}/*.{#{@extensions.join(',')}}").first).mtime
+          @mtime
         end
 
         def skip?
