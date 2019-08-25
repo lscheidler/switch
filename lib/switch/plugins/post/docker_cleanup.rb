@@ -22,6 +22,7 @@ module Switch
 
         plugin_argument :current_version
         plugin_argument :ecr_repository
+        plugin_argument :environment_name
         plugin_argument :application
 
         plugin_argument :switch_only, optional: true
@@ -37,7 +38,7 @@ module Switch
                     'docker',
                     'rmi', 
                     @ecr_repository + ':' + @application + '-' + @current_version,
-                    @ecr_repository + ':' + @application + '-previous'
+                    @ecr_repository + ':' + @application + '-' + @environment_name + '-previous'
                   ], print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun
                  )
         end
