@@ -2,6 +2,8 @@
 ==================
 
 - added plugins for docker and ecr
+- introduced "::before" and "::after" keywords for plugins
+- added deployment mode
 
 0.1.0 (2019-03-01)
 ==================

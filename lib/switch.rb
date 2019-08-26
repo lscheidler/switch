@@ -30,6 +30,13 @@ module Switch
   class CLI
     include Execute
 
+    PLUGIN_TYPES = [
+      'pre',
+      'switch',
+      'post',
+      'notification'
+    ]
+
     def initialize
       set_defaults
       parse_arguments
@@ -54,6 +61,7 @@ module Switch
           debug: false,
           environment_name: '',
           keep_releases: 5,
+          mode: 'default',
           next_version_plugin: 'Switch::Plugins::Artifact::Artifact',
           next_version_remote_plugin: 'Switch::Plugins::Version::S3NextVersion',
           relative_link: true,
@@ -101,6 +109,10 @@ module Switch
 
         opts.on('-k', '--keep-releases NUM', Integer, 'number of releases, which are not affected from auto cleanup, youngest first', "default: #{@config[:keep_releases]}") do |keep_releases|
           @command_line_options[:keep_releases] = keep_releases
+        end
+
+        opts.on('-m', '--deploy-mode MODE', 'set deployment mode', "default: #{@config[:mode]}") do |mode|
+          @command_line_options[:mode] = mode
         end
 
         opts.on('-n', '--dryrun', 'do not switch') do
@@ -159,7 +171,8 @@ EXAMPLES:
       @pm.log = @log
 
       get_application_type unless @config[:type]
-      @config.insert 0, "<#{@config.type.to_s}>", @config.types.get(@config.type.to_s, default: {})
+      @config.insert 0, "<type_#{@config.type.to_s}>", @config.types.get(@config.type.to_s, default: {})
+      @config.insert 1, "<mode_#{@config.mode.to_s}>", @config.modes.get(@config.mode.to_s, default: {})
 
       get_current_version
       get_next_version
@@ -169,9 +182,9 @@ EXAMPLES:
       @pm.initialize_plugins(defaults: @config)
 
       if switch?
-        each_plugin([:pre, :switch, :post, :notification]) do |plugin_group, plugin_class, plugin|
+        each_plugin(PLUGIN_TYPES) do |plugin_group, plugin_class, plugin|
           if not plugin.nil? and not plugin.skip?
-            plugin.send(plugin_group)
+            plugin.send(plugin_group.to_s)
           end
         end
       end
@@ -235,18 +248,25 @@ EXAMPLES:
       types = @config.get(:types)
       types ||= {} # if types is not set
 
-      @plugins = {
-        pre:    types.get([@config[:type].to_s, 'plugins', 'pre'], default: []),
-        switch: types.get([@config[:type].to_s, 'plugins', 'switch'], default: ['SwitchPreviousLink', 'SwitchCurrentLink']),
-        post:   types.get([@config[:type].to_s, 'plugins', 'post'], default: []),
-        notification: types.get([@config[:type].to_s, 'plugins', 'notification'], default: [])
-      }
+      @plugins = {}
+      PLUGIN_TYPES.map do |p|
+        # before
+        @plugins[p.to_s + '::before'] = @config.plugins.get(p.to_s + '::before')
+        @plugins[p.to_s + '::before'] ||= @config.modes.get([@config.mode,'plugins'],{}).get(p.to_s + '::before', default: [])
+
+        @plugins[p.to_s] = @config.plugins.get(p.to_s)
+        @plugins[p.to_s] ||= @config.modes.get([@config.mode,'plugins'],{}).get(p.to_s, default: [])
+
+        # after
+        @plugins[p.to_s + '::after'] = @config.plugins.get(p.to_s + '::after')
+        @plugins[p.to_s + '::after'] ||= @config.modes.get([@config.mode,'plugins'],{}).get(p.to_s + '::after', default: [])
+      end
 
       plugin_not_found = false
       @plugins.each do |key, list_of_plugins|
         prefix = 'Switch::Plugins::'
-        if key != :switch
-          prefix += key.to_s.capitalize + '::'
+        if key != :switch and not key.start_with? 'switch'
+          prefix += key[/([^:]*)/, 1].to_s.capitalize + '::'
         end
 
         list_of_plugins.map! do |plugin|
@@ -273,7 +293,7 @@ EXAMPLES:
       puts
       puts colorize('  Following commands are going to be executed:')
 
-      each_plugin([:pre, :switch, :post, :notification]) do |plugin_group, plugin_class, plugin|
+      each_plugin(PLUGIN_TYPES) do |plugin_group, plugin_class, plugin|
         if (plugin.nil? and plugin_class.show_always?) or (plugin and plugin_class.show_always? and plugin.skip?)
           puts colorize('    - skipping: ' + plugin_class.send((plugin_group.to_s + '_description').to_sym), color: :yellow)
         elsif not plugin.nil? and not plugin.skip?
@@ -296,10 +316,18 @@ EXAMPLES:
 
     def each_plugin groups
       groups.each do |plugin_group|
-        #@pm.each(group: plugin_group) do |plugin_class, plugin|
-        #  yield plugin_group, plugin_class, plugin
-        #end
+        # before
+        @plugins[plugin_group + '::before'].each do |plugin_class|
+          yield plugin_group, plugin_class, @pm.instance(plugin_class.name)
+        end
+
+        #
         @plugins[plugin_group].each do |plugin_class|
+          yield plugin_group, plugin_class, @pm.instance(plugin_class.name)
+        end
+
+        # after
+        @plugins[plugin_group + '::after'].each do |plugin_class|
           yield plugin_group, plugin_class, @pm.instance(plugin_class.name)
         end
       end

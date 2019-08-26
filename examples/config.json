@@ -1,28 +1,37 @@
 {
-  "newrelic_api_key": "",
   "graphite_host": "localhost",
   "base_directory": "/data/app/data",
   "type_command": {
     "command": "/usr/local/bin/<%= @application_service_name %>",
     "arguments": ["-i", "TYPE"]
   },
-  "types": {
+  "modes": {
+    "default": {
+      "plugins": {
+        "post::before": [
+          "UploadVersionInformation"
+        ],
+        "post::after": [
+          "AutoCleanup",
+          "Cleanup"
+        ],
+        "notification": [
+          "Graphite"
+        ]
+      }
+    },
     "docker": {
-      "artifact_plugin": "Switch::Plugins::Artifact::ECR",
       "ecr_repository": "<account-id>.dkr.ecr.<region>.amazonaws.com/<registry-name>",
       "current_version_plugin": "Switch::Plugins::Version::CurrentDockerImageVersion",
       "next_version_plugin": "Switch::Plugins::Artifact::ECR",
       "plugins": {
-        "pre": [
-          "::StartStopProcess"
-        ],
         "switch": [
           "DockerTagAndPush"
         ],
-        "post": [
-          "UploadVersionInformation",
-          "::StartStopProcess",
-          "EnableSystemdProcess",
+        "post::before": [
+          "UploadVersionInformation"
+        ],
+        "post::after": [
           "DockerAutoCleanup",
           "DockerCleanup"
         ],
@@ -30,7 +39,9 @@
           "Graphite"
         ]
       }
-    },
+    }
+  },
+  "types": {
     "tomcat": {
       "pattern": "p[0-9]{4}",
       "plugins": {
@@ -39,14 +50,8 @@
           "EmptyWorkingDirectory"
         ],
         "post": [
-          "UploadVersionInformation",
           "StartProcess",
-          "EnableSystemdProcess",
-          "AutoCleanup",
-          "Cleanup"
-        ],
-        "notification": [
-          "Graphite"
+          "EnableSystemdProcess"
         ]
       }
     },
@@ -57,26 +62,8 @@
           "StopProcess"
         ],
         "post": [
-          "UploadVersionInformation",
           "StartProcess",
           "EnableApplicationProcess"
-        ],
-        "notification": [
-          "Graphite"
-        ]
-      }
-    },
-    "timer": {
-      "plugins": {
-        "notification": [
-          "Graphite"
-        ]
-      }
-    },
-    "batch": {
-      "plugins": {
-        "notification": [
-          "Graphite"
         ]
       }
     }
