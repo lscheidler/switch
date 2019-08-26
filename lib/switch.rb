@@ -189,9 +189,10 @@ EXAMPLES:
 
       @pm.log = @log
 
+      @config.load_config_file_at 1, "/etc/default/#{@config.application}.switch.json" if File.exist? "/etc/default/#{@config.application}.switch.json"
       get_application_type unless @config[:type]
-      @config.insert 0, "<type_#{@config.type.to_s}>", @config.types.get(@config.type.to_s, default: {})
-      @config.insert 1, "<mode_#{@config.mode.to_s}>", @config.modes.get(@config.mode.to_s, default: {})
+      @config.insert 1, "<type_#{@config.type.to_s}>", @config.types.get(@config.type.to_s, default: {})
+      @config.insert 2, "<mode_#{@config.mode.to_s}>", @config.modes.get(@config.mode.to_s, default: {})
 
       get_current_version
       get_next_version
