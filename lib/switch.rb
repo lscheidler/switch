@@ -65,10 +65,29 @@ module Switch
           next_version_plugin: 'Switch::Plugins::Artifact::Artifact',
           next_version_remote_plugin: 'Switch::Plugins::Version::S3NextVersion',
           relative_link: true,
-          output: Proc.new {|msg| Kernel.subsection msg, color: :yellow}
+          output: Proc.new {|msg| Kernel.subsection msg, color: :yellow},
+          default_mode: {
+            plugins: {
+              "switch": [
+                'SwitchPreviousLink',
+                'SwitchCurrentLink'
+              ],
+              "post::before": [
+                "UploadVersionInformation"
+              ],
+              "post::after": [
+                "AutoCleanup",
+                "Cleanup"
+              ],
+              "notification": [
+                "Graphite"
+              ]
+            }
+          }
         }
       )
       @config[:destination_directory] = @config.get(:base_directory) + '/data'
+      @config[:modes]['default'] ||= @config.default_mode
 
       @switch_log_filename = @config.get(:base_directory) + '/logs/switch.log'
 

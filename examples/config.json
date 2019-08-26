@@ -6,20 +6,6 @@
     "arguments": ["-i", "TYPE"]
   },
   "modes": {
-    "default": {
-      "plugins": {
-        "post::before": [
-          "UploadVersionInformation"
-        ],
-        "post::after": [
-          "AutoCleanup",
-          "Cleanup"
-        ],
-        "notification": [
-          "Graphite"
-        ]
-      }
-    },
     "docker": {
       "ecr_repository": "<account-id>.dkr.ecr.<region>.amazonaws.com/<registry-name>",
       "current_version_plugin": "Switch::Plugins::Version::CurrentDockerImageVersion",
