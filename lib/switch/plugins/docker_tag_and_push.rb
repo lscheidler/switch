@@ -53,15 +53,17 @@ module Switch
 
         @switch_log.info "user=#{get_user} environment=#{@environment_name} application=#{@application} from=#{@current_version} to=#{@version}"
 
-        self.puts "tag previous docker image #{@application}-#{@current_version} to #{@application}-#{@environment_name}-previous"
-        cmd = ['docker', 'tag', @ecr_repository + ':' + @application + '-' + @current_version, @ecr_repository + ':' + @application + '-' + @environment_name + '-previous']
-        @status = execute(cmd, io_options: {:err=>[:child, :out]}, print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
-        fail "docker tag failed." if not @status.success?
+        if @current_version
+          self.puts "tag previous docker image #{@application}-#{@current_version} to #{@application}-#{@environment_name}-previous"
+          cmd = ['docker', 'tag', @ecr_repository + ':' + @application + '-' + @current_version, @ecr_repository + ':' + @application + '-' + @environment_name + '-previous']
+          @status = execute(cmd, io_options: {:err=>[:child, :out]}, print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
+          fail "docker tag failed." if not @status.success?
 
-        self.puts "push tag #{@application}-#{@environment_name}-previous"
-        cmd = ['docker', 'push', @ecr_repository + ':' + @application + '-' + @environment_name + '-previous']
-        @status = execute(cmd, io_options: {:err=>[:child, :out]}, print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
-        fail "docker tag failed." if not @status.success?
+          self.puts "push tag #{@application}-#{@environment_name}-previous"
+          cmd = ['docker', 'push', @ecr_repository + ':' + @application + '-' + @environment_name + '-previous']
+          @status = execute(cmd, io_options: {:err=>[:child, :out]}, print_lines: true, print_cmd: true, raise_exception: true, dryrun: @dryrun)
+          fail "docker tag failed." if not @status.success?
+        end
       end
 
       def get_user
