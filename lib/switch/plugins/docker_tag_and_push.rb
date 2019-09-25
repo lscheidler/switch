@@ -34,10 +34,13 @@ module Switch
       end
 
       def switch_description
-        [
+        description = [
           "tag and push new docker image #{@application}-#{@version} to #{@application}-#{@environment_name}",
-          "tag and push previous docker image #{@application}-#{@current_version} to #{@application}-#{@environment_name}-previous"
         ]
+        if @current_version
+          description << "tag and push previous docker image #{@application}-#{@current_version} to #{@application}-#{@environment_name}-previous"
+        end
+        description
       end
 
       def switch
