@@ -59,6 +59,7 @@ def initialize_test_data
     environment_name: 'staging',
     output: Proc.new {|msg| puts msg},
     switch_log: OutputLogger.new,
+    ecr_repository: '<account-id>.dkr.ecr.<region>.amazonaws.com/<name>',
     version: '0.1.0'
   }
 

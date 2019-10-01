@@ -31,7 +31,7 @@ module Switch
 
         plugin_argument :access_key_id, optional: true
         plugin_argument :secret_access_key, optional: true
-        plugin_argument :ecr_region, optional: true, default: 'eu-central-1'
+        plugin_argument :aws_region, optional: true, default: 'eu-central-1'
 
         def self.artifact_description
           'get artifact'
@@ -53,7 +53,7 @@ module Switch
           end
 
           ecr = Aws::ECR::Resource.new(
-            region: @ecr_region
+            region: @aws_region
           )
           authorization_token_resource = ecr.client.get_authorization_token
           username, token = Base64.decode64(authorization_token_resource.authorization_data.first.authorization_token).split(':')

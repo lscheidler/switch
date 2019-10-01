@@ -24,6 +24,7 @@ require_relative 'plugins/start_stop_process'
 require_relative 'plugins/switch_previous_link'
 require_relative 'plugins/switch_current_link'
 require_relative 'plugins/docker_tag_and_push'
+require_relative 'plugins/aws_alb'
 
 require_relative 'plugins/post/upload_version_information'
 require_relative 'plugins/post/start_process'
