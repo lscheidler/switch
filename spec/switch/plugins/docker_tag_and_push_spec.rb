@@ -30,20 +30,20 @@ describe Switch::Plugins::DockerTagAndPush do
 
   it 'should tag and push' do
     expect{@plugin.switch}.to output(
-       """tag new docker image test-app-0.1.0 to test-app-staging
+      /#{"""tag new docker image test-app-0.1.0 to test-app-staging
 | docker tag <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-0.1.0 <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-staging
 docker tag <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-0.1.0 <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-staging
 push tag test-app-staging
 | docker push <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-staging
 docker push <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-staging
-log: user=lscheidler environment=staging application=test-app from=0.0.1 to=0.1.0
+log: user=[a-zA-Z0-9]* environment=staging application=test-app from=0.0.1 to=0.1.0
 tag previous docker image test-app-0.0.1 to test-app-staging-previous
 | docker tag <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-0.0.1 <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-staging-previous
 docker tag <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-0.0.1 <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-staging-previous
 push tag test-app-staging-previous
 | docker push <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-staging-previous
 docker push <account-id>.dkr.ecr.<region>.amazonaws.com/<name>:test-app-staging-previous
-"""
+"""}/
     ).to_stdout
   end
 end
