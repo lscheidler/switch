@@ -38,7 +38,7 @@ module Switch
           if @status.success?
             tags = JSON::parse(@status.stdout).first['RepoTags']
             tags.delete(@ecr_repository + ':' + @application + '-' + @environment_name)
-            @version = tags.first[/#{@ecr_repository}:#{@application}-(.*)/, 1]
+            @version = tags.first[/#{@ecr_repository}:#{@application}-(.*)/, 1] unless tags.empty?
           end
         end
 

@@ -103,7 +103,7 @@ module Switch
       end
 
       def skip?
-        @switch_only or @alb_target_group.nil? or @instance_id.nil?
+        @switch_only or @alb_target_group.nil? or @alb_target_group.empty? or @instance_id.nil?
       end
 
       def self.show_always?

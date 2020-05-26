@@ -1,4 +1,4 @@
-0.2.1 (2019-10-??)
+0.2.1 (2020-05-26)
 ==================
 
 - added plugin for aws alb deregistration and registration
