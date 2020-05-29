@@ -1,4 +1,4 @@
-# Copyright 2018 Lars Eric Scheidler
+# Copyright 2020 Lars Eric Scheidler
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ module Switch
       @config = OverlayConfig::Config.new(
         config_scope: 'switch',
         defaults: {
+          action: :switch,
           auto_cleanup: true,
           base_directory: '/data/app',
           bucket_name: 'my-application-artifacts',
@@ -126,6 +127,10 @@ module Switch
           @command_line_options[:environment_name] = environment_name
         end
 
+        opts.on('-i', '--info', 'return version information as json') do
+          @command_line_options[:action] = :info
+        end
+
         opts.on('-k', '--keep-releases NUM', Integer, 'number of releases, which are not affected from auto cleanup, youngest first', "default: #{@config[:keep_releases]}") do |keep_releases|
           @command_line_options[:keep_releases] = keep_releases
         end
@@ -195,16 +200,25 @@ EXAMPLES:
       @config.insert 2, "<mode_#{@config.mode.to_s}>", @config.modes.get(@config.mode.to_s, default: {})
 
       get_current_version
-      get_next_version
 
-      activate_plugins
+      case @config.action
+      when :info
+        puts JSON::dump({
+          currentVersion: @config[:current_version],
+          currentVersionMtime: @config[:current_version_mtime],
+        })
+      else
+        get_next_version
 
-      @pm.initialize_plugins(defaults: @config)
+        activate_plugins
 
-      if switch?
-        each_plugin(PLUGIN_TYPES) do |plugin_group, plugin_class, plugin|
-          if not plugin.nil? and not plugin.skip?
-            plugin.send(plugin_group.to_s)
+        @pm.initialize_plugins(defaults: @config)
+
+        if switch?
+          each_plugin(PLUGIN_TYPES) do |plugin_group, plugin_class, plugin|
+            if not plugin.nil? and not plugin.skip?
+              plugin.send(plugin_group.to_s)
+            end
           end
         end
       end
@@ -217,7 +231,7 @@ EXAMPLES:
       begin
         @config[:current_version_mtime] = current_version.mtime
       rescue TypeError
-        puts colorize('| failed to get modification time for release', color: :yellow)
+        warn colorize('| failed to get modification time for release', color: :yellow)
       end
     end
 
@@ -226,7 +240,7 @@ EXAMPLES:
         begin
           @config[:version] = @pm[@config.get('next_version_remote_plugin')].new(@config).version
         rescue
-          puts colorize('| Retrieving remote version failed.', color: :yellow)
+          warn colorize('| Retrieving remote version failed.', color: :yellow)
         end
       end
 
@@ -237,7 +251,7 @@ EXAMPLES:
       begin
         @config[:version_mtime] = next_version.mtime
       rescue TypeError
-        puts colorize('| failed to get modification time for release', color: :yellow)
+        warn colorize('| failed to get modification time for release', color: :yellow)
       end
     end
 
@@ -249,7 +263,7 @@ EXAMPLES:
           end
         end
       else
-        puts colorize('| no application types set in switch config', color: :yellow)
+        warn colorize('| no application types set in switch config', color: :yellow)
       end
 
       if @config[:type].nil?
@@ -297,7 +311,7 @@ EXAMPLES:
                         end
           @pm[plugin_name] and @pm[plugin_name].plugin_setting :disabled, false
           if @pm[plugin_name].nil?
-            puts colorize('| cannot find plugin ' + plugin_name, color: :yellow)
+            warn colorize('| cannot find plugin ' + plugin_name, color: :yellow)
             plugin_not_found = true
           end
           @pm[plugin_name]
