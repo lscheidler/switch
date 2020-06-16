@@ -147,6 +147,10 @@ module Switch
           @command_line_options[:auto_cleanup] = false
         end
 
+        opts.on('--prefetch', 'prefetch artifact') do
+          @command_line_options[:action] = :prefetch
+        end
+
         opts.on('--switch-only', 'do not run any additional hooks') do
           @command_line_options[:switch_only] = true
         end
@@ -207,6 +211,8 @@ EXAMPLES:
           currentVersion: @config[:current_version],
           currentVersionMtime: @config[:current_version_mtime],
         })
+      when :prefetch
+        get_next_version
       else
         get_next_version
 

@@ -1,3 +1,8 @@
+0.2.3 (2020-06-16)
+==================
+
+- add --prefetch argument for prefetching artifacts without switching.
+
 0.2.2 (2020-05-29)
 ==================
 
