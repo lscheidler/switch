@@ -1,3 +1,8 @@
+0.2.4 (2020-06-17)
+==================
+
+- aws alb: support dryrun (do not deregister and register to alb, if in dryrun mode)
+
 0.2.3 (2020-06-16)
 ==================
 

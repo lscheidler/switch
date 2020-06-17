@@ -63,7 +63,7 @@ module Switch
               id: @instance_id, 
             }, 
           ], 
-        })
+        }) unless @dryrun
         self.puts "wait for deregistration of #{@instance_id} from #{@alb_target_group}"
         @client.wait_until(
           :target_deregistered,
@@ -73,7 +73,7 @@ module Switch
               id: @instance_id
             }
           ]
-        )
+        ) unless @dryrun
       end
 
       def self.post_description
@@ -89,7 +89,7 @@ module Switch
               id: @instance_id, 
             }, 
           ], 
-        })
+        }) unless @dryrun
         self.puts "wait for registration of #{@instance_id} to #{@alb_target_group}"
         @client.wait_until(
           :target_in_service,
@@ -99,7 +99,7 @@ module Switch
               id: @instance_id
             }
           ]
-        )
+        ) unless @dryrun
       end
 
       def skip?

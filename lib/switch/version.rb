@@ -13,5 +13,5 @@
 # limitations under the License.
 
 module Switch
-  VERSION = "0.2.3"
+  VERSION = "0.2.4"
 end
